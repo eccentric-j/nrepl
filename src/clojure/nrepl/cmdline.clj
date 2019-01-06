@@ -72,11 +72,15 @@
   "Returns nREPL interactive repl intro copy and version info as a new-line
   separated string."
   []
-  (str/join "\n" [(format "nREPL %s" (:version-string version/version))
-                  (str "Clojure " (clojure-version))
-                  (System/getProperty "java.vm.name") (System/getProperty "java.runtime.version")
-                  (str "Interrupt: Control+C")
-                  (str "Exit:      Control+D or (exit) or (quit)")]))
+  (format "nrepl %s
+Clojure %s
+%s %s
+Interrupt: Control+C
+Exit:      Control+D or (exit) or (quit)"
+          (:version-string version/version)
+          (clojure-version)
+          (System/getProperty "java.vm.name")
+          (System/getProperty "java.runtime.version")))
 
 (defn- run-repl
   ([host port]
@@ -151,9 +155,9 @@
         (recur (rest rem-args)
                (assoc options arg (first rem-args)))))))
 
-(defn- display-help
+(defn help
   []
-  (println "Usage:
+  (str "Usage:
 
   -i/--interactive            Start nREPL and connect to it with the built-in client.
   -c/--connect                Connect to a running nREPL with the built-in client.
@@ -260,7 +264,7 @@
 (defn display-help
   "Displays help copy to the user and exits the program"
   []
-  (display-help)
+  (println (help))
   (exit 0))
 
 (defn display-version
@@ -345,7 +349,7 @@
   Prints a message describing the acknowledgement between servers.
   Returns nil."
   [server options]
-  (when-let [ack-port (get-ack-port options)]
+  (when-let [ack-port (resolve-ack-port options)]
     (let [port (:port server)
           transport (:transport options)]
       (binding [*out* *err*]
@@ -385,12 +389,12 @@
   puts the current thread to sleep
   Takes nREPL server map and processed CLI options map.
   Returns nil."
-  [server options
-    (let [transport (:transport options)
-          host (:host server)
-          port (:port server)]
-      (run-repl host port (merge (when (:color options) colored-output)
-                                 {:transport transport})))])
+  [server options]
+  (let [transport (:transport options)
+        host (:host server)
+        port (:port server)]
+    (run-repl host port (merge (when (:color options) colored-output)
+                               {:transport transport}))))
 
 (defn create-server
   "Creates an nREPL server instance, prints connection info, saves port file,
@@ -398,7 +402,7 @@
   Takes map of CLI options.
   Returns nREPL server map."
   [options]
-  (let [{:keys [port bind handler transport greeting] options}]
+  (let [{:keys [port bind handler transport greeting]} options]
     (start-server :port port
                   :bind bind
                   :handler handler
@@ -412,7 +416,8 @@
   (cond (:help options)    (display-help)
         (:version options) (display-version)
         (:connect options) (connect-to-server options)
-        :else (let [server (create-server (get-server-options options))]
+        :else (let [options (get-server-options options)
+                    server (create-server options)]
                 (ack-server server options)
                 (println (connection-header server options))
                 (save-port-file! server options)
