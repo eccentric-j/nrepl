@@ -402,17 +402,12 @@
   Takes map of CLI options.
   Returns nREPL server map."
   [options]
-  (let [options (get-server-options options)
-        {:keys [port bind handler transport greeting]} options
-        server (start-server :port port
-                             :bind bind
-                             :handler handler
-                             :transport-fn transport
-                             :greeting-fn greeting)]
-    (ack-server server options)
-    (println (connection-header server options))
-    (save-port-file! server options)
-    (interactive-repl-or-sleep server options)))
+  (let [{:keys [port bind handler transport greeting] options}]
+    (start-server :port port
+                  :bind bind
+                  :handler handler
+                  :transport-fn transport
+                  :greeting-fn greeting)))
 
 (defn dispatch-commands
   "Look at options to dispatch a specified command.
@@ -421,7 +416,11 @@
   (cond (:help options)    (help-command)
         (:version options) (version-command)
         (:connect options) (connect-command options)
-        :else (server-command options)))
+        :else (let [server (server-command (get-server-options options))]
+                (ack-server server options)
+                (println (connection-header server options))
+                (save-port-file! server options)
+                (interactive-repl-or-sleep server options))))
 
 (defn -main
   [& args]
