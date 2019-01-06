@@ -423,19 +423,12 @@
         (:connect options) (connect-command options)
         :else (server-command options)))
 
-(defn- run
-  "Parses args, dispatches commands like help, version, connect, or starts an
-  nREPL server.
-  This function is largely side-effect driven."
-  [args]
-  (set-signal-handler! "INT" handle-interrupt)
-  (let [[options _args] (args->cli-options args)]
-    (dispatch-commands options)))
-
 (defn -main
   [& args]
   (try
-    (run args)
+    (set-signal-handler! "INT" handle-interrupt)
+    (let [[options _args] (args->cli-options args)]
+      (dispatch-commands options))
     (catch clojure.lang.ExceptionInfo ex
       (let [{:keys [::kind ::status]} (ex-data ex)]
         (when (= kind ::exit)
