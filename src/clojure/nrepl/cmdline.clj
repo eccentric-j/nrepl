@@ -269,7 +269,7 @@
   (println (:version-string version/version))
   (exit 0))
 
-(defn get-transport-option
+(defn- resolve-transport
   "Takes a map of nREPL CLI options.
   Returns either a default transport or the
   value of :transport."
@@ -279,7 +279,7 @@
                (require-and-resolve :transport))
       #'transport/bencode))
 
-(defn get-handler-option
+(defn- resolve-handler
   "Takes a map of nREPL CLI options and list of middleware.
   Returns a request handler function.
   If some handler was explicitly passed we'll use it, otherwise we'll build
@@ -290,7 +290,7 @@
                (require-and-resolve :handler))
       (build-handler middleware)))
 
-(defn get-ack-port
+(defn- resolve-ack-port
   "Takes a map of nREPL CLI options.
   Returns integer ack port or nil."
   [options]
@@ -298,7 +298,7 @@
           (:ack)
           (->int)))
 
-(defn get-greeting-option
+(defn- resolve-greeting
   "Takes a map of nREPL CLI options and the selected transport for the server.
   Returns a greeting function or nil."
   [options transport]
@@ -311,7 +311,7 @@
   [options]
   {:port (->int (:port options))
    :host (:host options)
-   :transport (get-transport-option options)})
+   :transport (resolve-transport options)})
 
 (defn get-server-options
   "Takes a map of nREPL CLI options
@@ -325,9 +325,9 @@
             :transport transport
             :bind (:bind options)
             :middleware middleware
-            :handler (get-handler-option options middleware)
-            :greeting (get-greeting-option options transport)
-            :ack-port (get-ack-port options)})))
+            :handler (resolve-handler options middleware)
+            :greeting (resolve-greeting options transport)
+            :ack-port (resolve-ack-port options)})))
 
 (defn connect-to-server
   "Connects to a running nREPL server and runs a REPL. Exits program when REPL
