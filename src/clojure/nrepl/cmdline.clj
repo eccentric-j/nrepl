@@ -380,21 +380,17 @@
     (.deleteOnExit port-file)
     (spit port-file port)))
 
-(defn interactive-repl-or-sleep
+(defn interactive-repl
   "Runs an interactive repl if :interactive CLI option is true otherwise
   puts the current thread to sleep
   Takes nREPL server map and processed CLI options map.
   Returns nil."
-  [server options]
-  (if (:interactive options)
+  [server options
     (let [transport (:transport options)
           host (:host server)
           port (:port server)]
       (run-repl host port (merge (when (:color options) colored-output)
-                                 {:transport transport})))
-      ;; need to hold process open with a non-daemon thread
-      ;;   -- this should end up being super-temporary
-    (Thread/sleep Long/MAX_VALUE)))
+                                 {:transport transport})))])
 
 (defn server-command
   "Creates an nREPL server instance, prints connection info, saves port file,
@@ -420,7 +416,11 @@
                 (ack-server server options)
                 (println (connection-header server options))
                 (save-port-file! server options)
-                (interactive-repl-or-sleep server options))))
+                (if (:interactive options)
+                  (interactive-repl server options)
+                  ;; need to hold process open with a non-daemon thread
+                  ;;   -- this should end up being super-temporary
+                  (Thread/sleep Long/MAX_VALUE)))))
 
 (defn -main
   [& args]
