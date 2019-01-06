@@ -68,14 +68,15 @@
   (some (partial = input)
         ['exit 'quit '(exit) '(quit)]))
 
-(defn print-repl-intro
-  "Prints nREPL interactive repl intro copy and version info."
+(defn repl-intro
+  "Returns nREPL interactive repl intro copy and version info as a new-line
+  separated string."
   []
-  (println (format "nREPL %s" (:version-string version/version)))
-  (println (str "Clojure " (clojure-version)))
-  (println (System/getProperty "java.vm.name") (System/getProperty "java.runtime.version"))
-  (println (str "Interrupt: Control+C"))
-  (println (str "Exit:      Control+D or (exit) or (quit)")))
+  (str/join "\n" [(format "nREPL %s" (:version-string version/version))
+                  (str "Clojure " (clojure-version))
+                  (System/getProperty "java.vm.name") (System/getProperty "java.runtime.version")
+                  (str "Interrupt: Control+C")
+                  (str "Exit:      Control+D or (exit) or (quit)")]))
 
 (defn- run-repl
   ([host port]
@@ -91,7 +92,7 @@
          ns (atom "user")]
      (swap! running-repl assoc :transport transport)
      (swap! running-repl assoc :client client)
-     (print-repl-intro)
+     (println (repl-intro))
      (loop []
        (prompt @ns)
        (flush)
@@ -352,11 +353,11 @@
                          port ack-port)
                  (:status (send-ack port ack-port transport)))))))
 
-(defn print-connection-header
-  "Prints the nREPL server header that some tools rely on to parse the
+(defn connection-header
+  "Returns nREPL server header that some tools rely on to parse the
   connection details from.
   Takes nREPL server map and processed CLI options map.
-  Returns nil."
+  Returns connection header string."
   [server options]
   (let [transport (:transport options)
         port (:port server)
@@ -364,8 +365,8 @@
         host (.getHostName (.getInetAddress ssocket))]
     ;; The format here is important, as some tools (e.g. CIDER) parse the string
     ;; to extract from it the host and the port to connect to
-    (println (format "nREPL server started on port %d on host %s - %s://%s:%d"
-                     port host (transport/uri-scheme transport) host port))))
+    (format "nREPL server started on port %d on host %s - %s://%s:%d"
+            port host (transport/uri-scheme transport) host port)))
 
 (defn save-port-file!
   "Writes a file relative to project classpath with port number so other tools
@@ -408,11 +409,10 @@
                              :handler handler
                              :transport-fn transport
                              :greeting-fn greeting)]
-    (doto server
-      (ack-server options)
-      (print-connection-header options)
-      (save-port-file! options)
-      (interactive-repl-or-sleep options))))
+    (ack-server server options)
+    (println (connection-header server options))
+    (save-port-file! server options)
+    (interactive-repl-or-sleep server options)))
 
 (defn dispatch-commands
   "Look at options to dispatch a specified command.
