@@ -257,13 +257,13 @@
                     (merge-config))]
     [options _args]))
 
-(defn help-command
+(defn display-help
   "Displays help copy to the user and exits the program"
   []
   (display-help)
   (exit 0))
 
-(defn version-command
+(defn display-version
   "Displays the version to the user and exits the program"
   []
   (println (:version-string version/version))
@@ -329,7 +329,7 @@
             :greeting (get-greeting-option options transport)
             :ack-port (get-ack-port options)})))
 
-(defn connect-command
+(defn connect-to-server
   "Connects to a running nREPL server and runs a REPL. Exits program when REPL
   is closed.
   Takes a map of nREPL CLI options."
@@ -392,7 +392,7 @@
       (run-repl host port (merge (when (:color options) colored-output)
                                  {:transport transport})))])
 
-(defn server-command
+(defn create-server
   "Creates an nREPL server instance, prints connection info, saves port file,
   and runs an interactive repl or puts the thread to sleep.
   Takes map of CLI options.
@@ -409,10 +409,10 @@
   "Look at options to dispatch a specified command.
   Takes CLI options map. May return a server map, nil, or exit."
   [options]
-  (cond (:help options)    (help-command)
-        (:version options) (version-command)
-        (:connect options) (connect-command options)
-        :else (let [server (server-command (get-server-options options))]
+  (cond (:help options)    (display-help)
+        (:version options) (display-version)
+        (:connect options) (connect-to-server options)
+        :else (let [server (create-server (get-server-options options))]
                 (ack-server server options)
                 (println (connection-header server options))
                 (save-port-file! server options)
