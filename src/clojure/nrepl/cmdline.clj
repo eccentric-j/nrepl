@@ -72,7 +72,7 @@
   "Returns nREPL interactive repl intro copy and version info as a new-line
   separated string."
   []
-  (format "nrepl %s
+  (format "nREPL %s
 Clojure %s
 %s %s
 Interrupt: Control+C
