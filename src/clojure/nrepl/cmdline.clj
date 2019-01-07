@@ -309,7 +309,7 @@ Exit:      Control+D or (exit) or (quit)"
   (when (= transport #'transport/tty)
     #'transport/tty-greeting))
 
-(defn get-conn-options
+(defn connection-opts
   "Takes map of nREPL CLI options
   Returns map of processed options used to connect or start a nREPL server."
   [options]
@@ -317,12 +317,12 @@ Exit:      Control+D or (exit) or (quit)"
    :host (:host options)
    :transport (resolve-transport options)})
 
-(defn get-server-options
+(defn server-opts
   "Takes a map of nREPL CLI options
   Returns map of processed options to start an nREPL server."
   [options]
   (let [middleware (sanitize-middleware-option (:middleware options))
-        {:keys [host port transport]} (get-conn-options options)]
+        {:keys [host port transport]} (connection-opts options)]
     (merge options
            {:host host
             :port port
@@ -338,7 +338,7 @@ Exit:      Control+D or (exit) or (quit)"
   is closed.
   Takes a map of nREPL CLI options."
   [options]
-  (let [{:keys [host port transport]} (get-conn-options options)]
+  (let [{:keys [host port transport]} (connection-opts options)]
     (run-repl host port {:transport transport})
     (exit 0)))
 
@@ -416,7 +416,7 @@ Exit:      Control+D or (exit) or (quit)"
   (cond (:help options)    (display-help)
         (:version options) (display-version)
         (:connect options) (connect-to-server options)
-        :else (let [options (get-server-options options)
+        :else (let [options (server-opts options)
                     server (create-server options)]
                 (ack-server server options)
                 (println (connection-header server options))
