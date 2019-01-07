@@ -342,7 +342,7 @@ Exit:      Control+D or (exit) or (quit)"
     (run-repl host port {:transport transport})
     (exit 0)))
 
-(defn ack-server
+(defn ack-server!
   "Acknowledge the port of this server to another nREPL server running on
   :ack port.
   Takes nREPL server map and processed CLI options map.
@@ -384,7 +384,7 @@ Exit:      Control+D or (exit) or (quit)"
     (.deleteOnExit port-file)
     (spit port-file port)))
 
-(defn interactive-repl
+(defn interactive-repl!
   "Runs an interactive repl if :interactive CLI option is true otherwise
   puts the current thread to sleep
   Takes nREPL server map and processed CLI options map.
@@ -418,11 +418,11 @@ Exit:      Control+D or (exit) or (quit)"
         (:connect options) (connect-to-server options)
         :else (let [options (server-opts options)
                     server (create-server options)]
-                (ack-server server options)
+                (ack-server! server options)
                 (println (connection-header server options))
                 (save-port-file! server options)
                 (if (:interactive options)
-                  (interactive-repl server options)
+                  (interactive-repl! server options)
                   ;; need to hold process open with a non-daemon thread
                   ;;   -- this should end up being super-temporary
                   (Thread/sleep Long/MAX_VALUE)))))
