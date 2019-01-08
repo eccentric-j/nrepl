@@ -262,13 +262,13 @@ Exit:      Control+D or (exit) or (quit)"
     [options _args]))
 
 (defn display-help
-  "Displays help copy to the user and exits the program"
+  "Prints the help copy to the screen and exits the program with exit code 0."
   []
   (println (help))
   (exit 0))
 
 (defn display-version
-  "Displays the version to the user and exits the program"
+  "Prints nREPL version to the screen and exits the program with exit code 0."
   []
   (println (:version-string version/version))
   (exit 0))
