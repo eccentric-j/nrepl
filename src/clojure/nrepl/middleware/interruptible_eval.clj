@@ -155,7 +155,7 @@
                                        "ex" "The type of exception thrown, if any. If present, then `values` will be absent."
                                        "root-ex" "The type of the root exception thrown, if any. If present, then `values` will be absent."}}
                             "interrupt"
-                            {:doc "Attempts to interrupt some code evaluation."
+                            {:doc "Attempts to interrupt some code evaluation. When interruption succeeds, the thread used for code evaluation changes, while Clojure dynamic bindings are preserved, other `ThreadLocals` are not. So when running code intimately tied to the current thread identity, best avoid interruptions."
                              :requires {"session" "The ID of the session used to start the evaluation to be interrupted."}
                              :optional {"interrupt-id" "The opaque message ID sent with the original \"eval\" request."}
                              :returns {"status" "'interrupted' if an evaluation was identified and interruption will be attempted
