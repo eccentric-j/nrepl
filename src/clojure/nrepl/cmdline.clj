@@ -395,17 +395,15 @@ Exit:      Control+D or (exit) or (quit)"
                                {:transport transport}))))
 
 (defn create-server
-  "Creates an nREPL server instance, prints connection info, saves port file,
-  and runs an interactive repl or puts the thread to sleep.
+  "Creates an nREPL server instance.
   Takes map of CLI options.
   Returns nREPL server map."
-  [options]
-  (let [{:keys [port bind handler transport greeting]} options]
-    (start-server :port port
-                  :bind bind
-                  :handler handler
-                  :transport-fn transport
-                  :greeting-fn greeting)))
+  [{:keys [port bind handler transport greeting] :as options}]
+  (start-server :port port
+                :bind bind
+                :handler handler
+                :transport-fn transport
+                :greeting-fn greeting))
 
 (defn dispatch-commands
   "Look at options to dispatch a specified command.
