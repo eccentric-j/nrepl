@@ -336,10 +336,9 @@ Exit:      Control+D or (exit) or (quit)"
   "Connects to a running nREPL server and runs a REPL. Exits program when REPL
   is closed.
   Takes a map of nREPL CLI options."
-  [options]
-  (let [{:keys [host port transport]} (connection-opts options)]
-    (run-repl host port {:transport transport})
-    (exit 0)))
+  [{:keys [host port transport] :as options}]
+  (run-repl host port {:transport transport})
+  (exit 0))
 
 (defn ack-server!
   "Acknowledge the port of this server to another nREPL server running on
@@ -414,7 +413,7 @@ Exit:      Control+D or (exit) or (quit)"
   [options]
   (cond (:help options)    (display-help)
         (:version options) (display-version)
-        (:connect options) (connect-to-server options)
+        (:connect options) (connect-to-server (connection-opts options))
         :else (let [options (server-opts options)
                     server (create-server options)]
                 (ack-server! server options)
