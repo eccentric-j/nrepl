@@ -12,7 +12,11 @@
 #### Changes
 
 * [#16](https://github.com/nrepl/nrepl/issues/16): Use a single session thread per evaluation.
+<<<<<<< HEAD
 * [#108](https://github.com/nrepl/nrepl/issues/108) Break up meaty cmdline functions into a public, reusable API.
+=======
+* Support single-arity printer functions.
+>>>>>>> cbcf2f3d0d2d25c2e7f6de0d5eab980a7408462a
 
 ### 0.5.3 (2018-12-12)
 
