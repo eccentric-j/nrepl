@@ -275,8 +275,7 @@ Exit:      Control+D or (exit) or (quit)"
 
 (defn- resolve-transport
   "Takes a map of nREPL CLI options.
-  Returns either a default transport or the
-  value of :transport."
+  Returns either a default transport or the value of :transport."
   [options]
   (or (some->> options
                (:transport)
@@ -357,8 +356,8 @@ Exit:      Control+D or (exit) or (quit)"
                          port ack-port)
                  (:status (send-ack port ack-port transport)))))))
 
-(defn connection-header
-  "Returns nREPL server header that some tools rely on to parse the
+(defn server-started-message
+  "Returns nREPL server started message that some tools rely on to parse the
   connection details from.
   Takes nREPL server map and processed CLI options map.
   Returns connection header string."
@@ -419,7 +418,7 @@ Exit:      Control+D or (exit) or (quit)"
         :else (let [options (server-opts options)
                     server (create-server options)]
                 (ack-server! server options)
-                (println (connection-header server options))
+                (println (server-started-message server options))
                 (save-port-file! server options)
                 (if (:interactive options)
                   (interactive-repl! server options)
