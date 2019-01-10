@@ -10,7 +10,7 @@
    [nrepl.config :as config]
    [nrepl.core :as nrepl]
    [nrepl.ack :refer [send-ack]]
-   [nrepl.server :refer [start-server]]
+   [nrepl.server :as nrepl-server]
    [nrepl.transport :as transport]
    [nrepl.version :as version]))
 
@@ -394,16 +394,17 @@ Exit:      Control+D or (exit) or (quit)"
     (run-repl host port (merge (when (:color options) colored-output)
                                {:transport transport}))))
 
-(defn create-server
+(defn start-server
   "Creates an nREPL server instance.
   Takes map of CLI options.
   Returns nREPL server map."
   [{:keys [port bind handler transport greeting] :as options}]
-  (start-server :port port
-                :bind bind
-                :handler handler
-                :transport-fn transport
-                :greeting-fn greeting))
+  (nrepl-server/start-server
+   :port port
+   :bind bind
+   :handler handler
+   :transport-fn transport
+   :greeting-fn greeting))
 
 (defn dispatch-commands
   "Look at options to dispatch a specified command.
@@ -413,7 +414,7 @@ Exit:      Control+D or (exit) or (quit)"
         (:version options) (display-version)
         (:connect options) (connect-to-server (connection-opts options))
         :else (let [options (server-opts options)
-                    server (create-server options)]
+                    server (start-server options)]
                 (ack-server! server options)
                 (println (server-started-message server options))
                 (save-port-file! server options)
