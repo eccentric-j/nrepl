@@ -347,13 +347,13 @@ Exit:      Control+D or (exit) or (quit)"
   Prints a message describing the acknowledgement between servers.
   Returns nil."
   [server options]
-  (when-let [ack-port (resolve-ack-port options)]
+  (when-let [ack-port (:ack-port options)]
     (let [port (:port server)
           transport (:transport options)]
       (binding [*out* *err*]
         (println (format "ack'ing my port %d to other server running on port %d"
                          port ack-port)
-                 (:status (send-ack port ack-port transport)))))))
+                 (send-ack port ack-port transport))))))
 
 (defn server-started-message
   "Returns nREPL server started message that some tools rely on to parse the
