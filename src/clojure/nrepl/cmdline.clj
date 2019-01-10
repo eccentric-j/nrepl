@@ -273,7 +273,7 @@ Exit:      Control+D or (exit) or (quit)"
   (println (:version-string version/version))
   (exit 0))
 
-(defn- resolve-transport
+(defn- options->transport
   "Takes a map of nREPL CLI options.
   Returns either a default transport or the value of :transport."
   [options]
@@ -282,7 +282,7 @@ Exit:      Control+D or (exit) or (quit)"
                (require-and-resolve :transport))
       #'transport/bencode))
 
-(defn- resolve-handler
+(defn- options->handler
   "Takes a map of nREPL CLI options and list of middleware.
   Returns a request handler function.
   If some handler was explicitly passed we'll use it, otherwise we'll build
@@ -293,7 +293,7 @@ Exit:      Control+D or (exit) or (quit)"
                (require-and-resolve :handler))
       (build-handler middleware)))
 
-(defn- resolve-ack-port
+(defn- options->ack-port
   "Takes a map of nREPL CLI options.
   Returns integer ack port or nil."
   [options]
@@ -301,7 +301,7 @@ Exit:      Control+D or (exit) or (quit)"
           (:ack)
           (->int)))
 
-(defn- resolve-greeting
+(defn- options->greeting
   "Takes a map of nREPL CLI options and the selected transport for the server.
   Returns a greeting function or nil."
   [options transport]
@@ -314,7 +314,7 @@ Exit:      Control+D or (exit) or (quit)"
   [options]
   {:port (->int (:port options))
    :host (:host options)
-   :transport (resolve-transport options)})
+   :transport (options->transport options)})
 
 (defn server-opts
   "Takes a map of nREPL CLI options
@@ -328,9 +328,9 @@ Exit:      Control+D or (exit) or (quit)"
             :transport transport
             :bind (:bind options)
             :middleware middleware
-            :handler (resolve-handler options middleware)
-            :greeting (resolve-greeting options transport)
-            :ack-port (resolve-ack-port options)})))
+            :handler (options->handler options middleware)
+            :greeting (options->greeting options transport)
+            :ack-port (options->ack-port options)})))
 
 (defn connect-to-server
   "Connects to a running nREPL server and runs a REPL. Exits program when REPL
