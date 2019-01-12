@@ -1,11 +1,14 @@
 (ns nrepl.cmdline-test
+  ^:test-refresh/focus
   {:author "Chas Emerick"}
   (:require
    [clojure.test :refer :all]
    [nrepl.ack :as ack]
+   [nrepl.cmdline :as cmd]
    [nrepl.core :as nrepl]
    [nrepl.core-test :refer [*server* *transport-fn* transport-fns]]
-   [nrepl.server :as server])
+   [nrepl.server :as server]
+   [nrepl.transport :as transport])
   (:import (com.hypirion.io Pipe ClosingPipe)))
 
 (defn- start-server-for-transport-fn
@@ -46,6 +49,34 @@
             pump-err (doto (Pipe. err System/err) .start)
             pump-in (ClosingPipe. System/in in)]
         proc))))
+
+(deftest ^:test-refresh/focus repl-intro
+  (is (re-find #"nREPL" (cmd/repl-intro))))
+
+(deftest ^:test-refresh/focus help
+  (is (re-find #"Usage:" (cmd/help))))
+
+(deftest ^:test-refresh/focus parse-cli-values
+  (is (= {:other "string"
+          :middleware :middleware
+          :handler :handler
+          :transport :transport}
+         (cmd/parse-cli-values {:other "string"
+                                :middleware ":middleware"
+                                :handler ":handler"
+                                :transport ":transport"}))))
+
+(deftest ^:test-refresh/focus args->cli-options
+  (is (= [{:middleware :middleware :repl "true"} ["extra" "args"]]
+         (cmd/args->cli-options ["-m" ":middleware" "-r" "true" "extra" "args"]))))
+
+(deftest ^:test-refresh/focus connection-opts
+  (is (= {:port 5000
+          :host "0.0.0.0"
+          :transport #'transport/bencode}
+         (cmd/connection-opts {:port "5000"
+                               :host "0.0.0.0"
+                               :transport nil}))))
 
 (deftest ack
   (let [ack-port (:port *server*)
